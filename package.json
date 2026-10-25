@@ -1,0 +1,26 @@
+{
+  "name": "greenhouse-lever-ashby-job-board-scraper",
+  "version": "2.0.0",
+  "description": "Extract active job openings, engineering/sales hiring velocity, remote status, department breakdowns, and B2B buying intent triggers from ATS job boards.",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "greenhouse-lever-ashby-job-board-scraper": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "job-scraper",
+    "greenhouse",
+    "lever",
+    "recruiting-tools",
+    "hiring-signals",
+    "b2b-sales-triggers",
+    "hr-tech",
+    "lead-generation",
+    "web-scraping",
+    "apify"
+  ],
+  "license": "MIT"
+}
