@@ -1,53 +1,52 @@
 #!/usr/bin/env node
 /**
- * Greenhouse, Lever & AshbyHQ Hiring Signal & Job Board Scraper — Open-Source Quick Demo CLI
- * Cloud Actor (10,000+ scale at $0.50/1k): https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper
- * Full Turnkey n8n + Pro Automation Pack: https://buy.polar.sh/polar_cl_jBE4qe0WqkwWrjlJt8cMaPxI6NXr8DMSyy0292ehV0b
- * All-in-One 30-Pack Agency Mega Bundle ($39): https://buy.polar.sh/polar_cl_wNd92BUpp1y37jeYkBbeSrlCka5EWrmmg7TGN0DPTYY
+ * Greenhouse & Lever Company Job Board & Hiring Signal Scraper — Hybrid CLI & Cloud API Runner
+ * Cloud Actor: https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper ($0.50 / 1,000 jobs)
  */
+const token = process.env.APIFY_TOKEN;
+const sampleInput = {
+  "companySlugs": [
+    "stripe",
+    "figma",
+    "anthropic"
+  ],
+  "atsPlatform": "auto"
+};
 
-const targets = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["stripe","figma","datadog"];
+async function main() {
+  console.log('========================================================================');
+  console.log(' ⚡ Greenhouse & Lever Company Job Board & Hiring Signal Scraper');
+  console.log(' 🌐 Apify Cloud Endpoint: https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper');
+  console.log(' 💰 Pricing: $0.50 per 1,000 jobs ($0/mo subscription)');
+  console.log('========================================================================\n');
 
-async function runDemo() {
-  console.log('====================================================================');
-  console.log(' Greenhouse, Lever & AshbyHQ Hiring Signal & Job Board Scraper');
-  console.log(' Cloud Scale ($0.50/1k results): https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper');
-  console.log(' Full Pro Pack ($9) / Agency Mega Bundle ($39): https://buy.polar.sh/polar_cl_wNd92BUpp1y37jeYkBbeSrlCka5EWrmmg7TGN0DPTYY');
-  console.log('====================================================================\n');
-
-  for (const raw of targets) {
-    const domain = raw.replace(/^https?:\/\//i, '').split('/')[0];
-    const url = 'https://' + domain;
-    const t0 = Date.now();
-    try {
-      const [httpRes, mxRes, txtRes] = await Promise.all([
-        fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 Chrome/128.0.0.0' } }).catch(() => null),
-        fetch('https://dns.google/resolve?name=' + encodeURIComponent(domain) + '&type=MX').then(r => r.json()).catch(() => ({})),
-        fetch('https://dns.google/resolve?name=' + encodeURIComponent(domain) + '&type=TXT').then(r => r.json()).catch(() => ({})),
-      ]);
-      const html = httpRes ? await httpRes.text() : '';
-      const emails = [...new Set((html.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,10}\b/g) || []).map(e => e.toLowerCase()))].slice(0, 5);
-      const mx = (mxRes.Answer || []).map(a => a.data).slice(0, 3);
-      const spf = (txtRes.Answer || []).map(a => a.data).find(t => /v=spf1/i.test(t)) || null;
-
-      console.log(JSON.stringify({
-        target: domain,
-        httpStatus: httpRes ? httpRes.status : 0,
-        latencyMs: Date.now() - t0,
-        extractedEmails: emails.length ? emails : ['contact@' + domain, 'sales@' + domain],
-        mxServers: mx,
-        hasSpfPolicy: Boolean(spf),
-        cloudBatchUrl: 'https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper',
-      }, null, 2));
-    } catch (e) {
-      console.error('Error scanning', domain, e.message);
-    }
+  if (!token) {
+    console.log('ℹ️  [LOCAL PREVIEW MODE — No APIFY_TOKEN detected in environment]');
+    console.log('Showing sample input payload for ats-job-board-hiring-signal-scraper:\n');
+    console.log(JSON.stringify(sampleInput, null, 2));
+    console.log('\n🚀 TO RUN FULL PRODUCTION EXTRACTION IN THE CLOUD (WITH ANTI-BOT PROXIES):');
+    console.log('   1. Open Actor on Apify Store (includes $5 free monthly credit):');
+    console.log('      👉 https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper');
+    console.log('   2. Or run directly from your terminal with your Apify API token:');
+    console.log('      APIFY_TOKEN="apify_api_..." node index.js\n');
+    return;
   }
 
-  console.log('\n👉 Need 10,000+ domains enriched in the cloud or turnkey n8n/Make workflows?');
-  console.log('   • Cloud Scraper ($0.50 / 1k results): https://apify.com/lucacelli/ats-job-board-hiring-signal-scraper');
-  console.log('   • Turnkey n8n + CLI Pack ($9):        https://buy.polar.sh/polar_cl_jBE4qe0WqkwWrjlJt8cMaPxI6NXr8DMSyy0292ehV0b');
-  console.log('   • All 30 Packs & Chrome Extensions ($39): https://buy.polar.sh/polar_cl_wNd92BUpp1y37jeYkBbeSrlCka5EWrmmg7TGN0DPTYY');
+  console.log('🚀 Executing cloud run on Apify (lucacelli/ats-job-board-hiring-signal-scraper)...');
+  const res = await fetch('https://api.apify.com/v2/acts/lucacelli~ats-job-board-hiring-signal-scraper/run-sync-get-dataset-items?token=' + encodeURIComponent(token), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sampleInput)
+  });
+
+  if (!res.ok) {
+    console.error('API Error:', res.status, await res.text());
+    process.exit(1);
+  }
+
+  const items = await res.json();
+  console.log(`✅ Extracted ${items.length} items from Apify Cloud:\n`);
+  console.log(JSON.stringify(items.slice(0, 5), null, 2));
 }
 
-runDemo();
+main();
